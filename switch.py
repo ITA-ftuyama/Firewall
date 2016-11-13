@@ -33,7 +33,39 @@ class SimpleSwitch13(app_manager.RyuApp):
         u"""Simple Switch with Firewall."""
         super(SimpleSwitch13, self).__init__(*args, **kwargs)
         self.mac_to_port = {}
-        Firewall()
+        self.firewall = Firewall()
+
+    def do_firewall(self, datapath, priority, match, actions, buffer_id=None):
+        u"""Instala o módulo de firewall."""
+        ofproto = datapath.ofproto
+        parser = datapath.ofproto_parser
+
+        # Você sabe mexer com Tables?
+        to_table = 1
+        from_table = 0
+        table_id = 0
+
+        # ***************************************************
+        # Regras do Firewall
+        # Não é assim.... acho que está no lugar errado
+        # ***************************************************
+        # Não entendi nada!!
+        # Isso era para fazer match de uma regra e depois executar ela?
+        # Ou então esse é o script para adicionar nova regra?
+        # ***************************************************
+        for rule in self.firewall['permit']:
+            inst = [parser.OFPInstructionGotoTable(to_table)]
+            msg = parser.OFPFlowMod(datapath=datapath, priority=priority,
+                                    match=match, instructions=inst,
+                                    table_id=from_table)
+
+        for rule in self.firewall['deny']:
+            inst = [parser.OFPInstructionActions(
+                ofproto.OFPIT_APPLY_ACTIONS, [])]
+            msg = parser.OFPFlowMod(datapath=datapath, priority=priority,
+                                    match=match, instructions=inst,
+                                    table_id=table_id)
+        return msg
 
     @set_ev_cls(ofp_event.EventOFPSwitchFeatures, CONFIG_DISPATCHER)
     def switch_features_handler(self, ev):
@@ -106,6 +138,16 @@ class SimpleSwitch13(app_manager.RyuApp):
             out_port = ofproto.OFPP_FLOOD
 
         actions = [parser.OFPActionOutput(out_port)]
+
+        # ***************************************************
+        # Linhas para verificar o Firewall
+        # Não é assim.... acho que está no lugar errado
+        # ***************************************************
+        match = parser.OFPMatch(in_port=in_port, eth_dst=dst)
+        msg = self.do_firewall(datapath=datapath, priority=1,
+                               match=match, actions=actions,
+                               buffer_id=msg.buffer_id)
+        # ***************************************************
 
         # install a flow to avoid packet_in next time
         if out_port != ofproto.OFPP_FLOOD:
