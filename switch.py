@@ -25,6 +25,7 @@ from ryu.lib.packet import ethernet
 from ryu.lib.packet import ipv4
 from ryu.lib.packet import ether_types
 from firewall import Firewall
+import pprint
 
 
 class SimpleSwitch13(app_manager.RyuApp):
@@ -137,8 +138,8 @@ class SimpleSwitch13(app_manager.RyuApp):
         pkt = packet.Packet(msg.data)
         eth = pkt.get_protocols(ethernet.ethernet)[0]
 
-        ip = pkt.get_protocols(ipv4.ipv4)[0]
-        print ip.dst
+        print msg.data
+        pprint(pkt)
 
         if eth.ethertype == ether_types.ETH_TYPE_LLDP:
             # ignore lldp packet
