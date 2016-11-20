@@ -22,7 +22,7 @@ from ryu.controller.handler import set_ev_cls
 from ryu.ofproto import ofproto_v1_3
 from ryu.lib.packet import packet
 from ryu.lib.packet import ethernet
-from ryu.lib.packet import ipv6
+from ryu.lib.packet import ipv4
 from ryu.lib.packet import ether_types
 from firewall import Firewall
 
@@ -79,11 +79,11 @@ class SimpleSwitch13(app_manager.RyuApp):
         if rule['kind'] == 'IP':
             if 'src' in rule and 'dst' in rule:
                 match = parser.OFPMatch(
-                    ipv6_src=rule['src'], ipv6_dst=rule['dst'])
+                    ipv4_src=rule['src'], ipv4_dst=rule['dst'])
             elif 'src' in rule:
-                match = parser.OFPMatch(ipv6_src=rule['src'])
+                match = parser.OFPMatch(ipv4_src=rule['src'])
             elif 'dst' in rule:
-                match = parser.OFPMatch(ipv6_dst=rule['dst'])
+                match = parser.OFPMatch(ipv4_dst=rule['dst'])
         return match
 
     @set_ev_cls(ofp_event.EventOFPSwitchFeatures, CONFIG_DISPATCHER)
@@ -141,7 +141,7 @@ class SimpleSwitch13(app_manager.RyuApp):
 
         pprint(vars(pkt))
         pprint(dir(pkt))
-        protocolos = pkt.get_protocols(ipv6.ipv6)
+        protocolos = pkt.get_protocols(ipv4.ipv4)
         if len(protocolos) > 0:
             ip = protocolos[0]
             pprint(vars(ip))
