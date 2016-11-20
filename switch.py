@@ -49,23 +49,25 @@ class SimpleSwitch13(app_manager.RyuApp):
         table_id = 0
 
         for rule in self.firewall.rules['permit']:
-            match = self.retrieve_matcher(rule, parser)
-            inst = [parser.OFPInstructionGotoTable(to_table)]
-            msg = parser.OFPFlowMod(datapath=datapath, priority=priority,
-                                    match=match, instructions=inst,
-                                    table_id=table_id)
-            datapath.send_msg(msg)
+            if rule['kind'] == 'IP':
+                match = self.retrieve_matcher(rule, parser)
+                inst = [parser.OFPInstructionGotoTable(to_table)]
+                msg = parser.OFPFlowMod(datapath=datapath, priority=priority,
+                                        match=match, instructions=inst,
+                                        table_id=table_id)
+                datapath.send_msg(msg)
 
         for rule in self.firewall.rules['deny']:
-            inst = [parser.OFPInstructionActions(
-                ofproto.OFPIT_APPLY_ACTIONS, [])]
-            msg = parser.OFPFlowMod(datapath=datapath, priority=priority,
-                                    match=match, instructions=inst,
-                                    table_id=table_id)
-            # print "<msg>"
-            # pprint(msg)
-            # print "<msg/>"
-            datapath.send_msg(msg)
+            if rule['kind'] == 'IP':
+                inst = [parser.OFPInstructionActions(
+                    ofproto.OFPIT_APPLY_ACTIONS, [])]
+                msg = parser.OFPFlowMod(datapath=datapath, priority=priority,
+                                        match=match, instructions=inst,
+                                        table_id=table_id)
+                # print "<msg>"
+                # pprint(msg)
+                # print "<msg/>"
+                datapath.send_msg(msg)
 
     def retrieve_matcher(self, rule, parser):
         u"""Retorna o matcher adequado."""
