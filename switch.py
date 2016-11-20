@@ -138,12 +138,16 @@ class SimpleSwitch13(app_manager.RyuApp):
 
         pkt = packet.Packet(msg.data)
         eth = pkt.get_protocols(ethernet.ethernet)[0]
-        ip = pkt.get_protocols(ipv6.ipv6)[0]
 
         pprint(vars(pkt))
         pprint(dir(pkt))
-        pprint(vars(ip))
-        pprint(dir(ip))
+        protocolos = pkt.get_protocols(ipv6.ipv6)
+        if len(protocolos) > 0:
+            ip = protocolos[0]
+            pprint(vars(ip))
+            pprint(dir(ip))
+        else:
+            print "NUM TEMM MEU DEUS!!!!"
 
         if eth.ethertype == ether_types.ETH_TYPE_LLDP:
                 # ignore lldp packet
