@@ -46,24 +46,7 @@ class SimpleSwitch13(app_manager.RyuApp):
         table_id = 0
 
         for rule in self.firewall.rules['permit']:
-            if rule['kind'] == 'TCP':
-                if 'src' in rule and 'dst' in rule:
-                    match = parser.OFPMatch(
-                        tcp_src=rule['src'], tcp_dst=rule['dst'])
-                elif 'src' in rule:
-                    match = parser.OFPMatch(tcp_src=rule['src'])
-                elif 'dst' in rule:
-                    match = parser.OFPMatch(tcp_dst=rule['dst'])
-
-            if rule['kind'] == 'IP':
-                if 'src' in rule and 'dst' in rule:
-                    match = parser.OFPMatch(
-                        ipv4_src=rule['src'], ipv4_dst=rule['dst'])
-                elif 'src' in rule:
-                    match = parser.OFPMatch(ipv4_src=rule['src'])
-                elif 'dst' in rule:
-                    match = parser.OFPMatch(ipv4_dst=rule['dst'])
-
+            match = self.matcher(rule, parser)
             inst = [parser.OFPInstructionGotoTable(to_table)]
             msg = parser.OFPFlowMod(datapath=datapath, priority=priority,
                                     match=match, instructions=inst,
@@ -71,30 +54,34 @@ class SimpleSwitch13(app_manager.RyuApp):
             datapath.send_msg(msg)
 
         for rule in self.firewall.rules['deny']:
-            if rule['kind'] == 'TCP':
-                if 'src' in rule and 'dst' in rule:
-                    match = parser.OFPMatch(
-                        tcp_src=rule['src'], tcp_dst=rule['dst'])
-                elif 'src' in rule:
-                    match = parser.OFPMatch(tcp_src=rule['src'])
-                elif 'dst' in rule:
-                    match = parser.OFPMatch(tcp_dst=rule['dst'])
-
-            if rule['kind'] == 'IP':
-                if 'src' in rule and 'dst' in rule:
-                    match = parser.OFPMatch(
-                        ipv4_src=rule['src'], ipv4_dst=rule['dst'])
-                elif 'src' in rule:
-                    match = parser.OFPMatch(ipv4_src=rule['src'])
-                elif 'dst' in rule:
-                    match = parser.OFPMatch(ipv4_dst=rule['dst'])
-
+            match = self.matcher(rule)
             inst = [parser.OFPInstructionActions(
                 ofproto.OFPIT_APPLY_ACTIONS, [])]
             msg = parser.OFPFlowMod(datapath=datapath, priority=priority,
                                     match=match, instructions=inst,
                                     table_id=table_id)
             datapath.send_msg(msg)
+
+    def matcher(self, rule, parser):
+        u"""Retorna o matcher adequado."""
+        if rule['kind'] == 'TCP':
+            if 'src' in rule and 'dst' in rule:
+                match = parser.OFPMatch(
+                    tcp_src=rule['src'], tcp_dst=rule['dst'])
+            elif 'src' in rule:
+                match = parser.OFPMatch(tcp_src=rule['src'])
+            elif 'dst' in rule:
+                match = parser.OFPMatch(tcp_dst=rule['dst'])
+
+        if rule['kind'] == 'IP':
+            if 'src' in rule and 'dst' in rule:
+                match = parser.OFPMatch(
+                    ipv4_src=rule['src'], ipv4_dst=rule['dst'])
+            elif 'src' in rule:
+                match = parser.OFPMatch(ipv4_src=rule['src'])
+            elif 'dst' in rule:
+                match = parser.OFPMatch(ipv4_dst=rule['dst'])
+        return match
 
     @set_ev_cls(ofp_event.EventOFPSwitchFeatures, CONFIG_DISPATCHER)
     def switch_features_handler(self, ev):
@@ -107,7 +94,7 @@ class SimpleSwitch13(app_manager.RyuApp):
         # Linhas para verificar o Firewall
         # Não é assim.... acho que está no lugar errado
         # ***************************************************
-        self.make_firewall(datapath=datapath, priority=1)
+        self.make_firewall(datapath=datapath, priority=1000)
         # ***************************************************
 
         # install table-miss flow entry
