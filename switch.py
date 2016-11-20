@@ -108,7 +108,7 @@ class SimpleSwitch13(app_manager.RyuApp):
         self.add_flow(datapath, 0, match, actions)
 
         # Adição de regras - Não está funcionando....
-        match = parser.OFPMatch(eth_dst=80)
+        match = parser.OFPMatch(ipv4_src='10.0.0.1', eth_type=0x800)
         actions = [parser.OFPActionOutput(80)]
         self.add_flow(datapath, 1, match, actions, 0)
 
