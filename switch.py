@@ -97,6 +97,8 @@ class SimpleSwitch13(app_manager.RyuApp):
         ofproto = datapath.ofproto
         parser = datapath.ofproto_parser
 
+        self.make_firewall(datapath=datapath, priority=1)
+
         # install table-miss flow entry
         #
         # We specify NO BUFFER to max_len of the output action due to
@@ -113,8 +115,6 @@ class SimpleSwitch13(app_manager.RyuApp):
         # match = parser.OFPMatch(ipv4_src='10.0.0.1', eth_type=0x800)
         # actions = [parser.OFPActionOutput(80)]
         # self.add_flow(datapath, 1, match, actions, 0)
-
-        self.make_firewall(datapath=datapath, priority=1000)
 
     def add_flow(self, datapath, priority, match, actions, table=1, buffer_id=None):
         u"""Add new flow to controller."""
