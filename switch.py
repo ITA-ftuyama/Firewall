@@ -45,8 +45,10 @@ class SimpleSwitch13(app_manager.RyuApp):
         to_table = 1
         table_id = 0
 
+        print 'cenoura'
+
         for rule in self.firewall.rules['permit']:
-            match = self.matcher(rule, parser)
+            match = self.retrieve_matcher(rule, parser)
             inst = [parser.OFPInstructionGotoTable(to_table)]
             msg = parser.OFPFlowMod(datapath=datapath, priority=priority,
                                     match=match, instructions=inst,
@@ -54,16 +56,17 @@ class SimpleSwitch13(app_manager.RyuApp):
             datapath.send_msg(msg)
 
         for rule in self.firewall.rules['deny']:
-            match = self.matcher(rule, parser)
+            match = self.retrieve_matcher(rule, parser)
             inst = [parser.OFPInstructionActions(
                 ofproto.OFPIT_APPLY_ACTIONS, [])]
             msg = parser.OFPFlowMod(datapath=datapath, priority=priority,
                                     match=match, instructions=inst,
                                     table_id=table_id)
             print msg
+            print 'batata'
             datapath.send_msg(msg)
 
-    def matcher(self, rule, parser):
+    def retrieve_matcher(self, rule, parser):
         u"""Retorna o matcher adequado."""
         if rule['kind'] == 'TCP':
             if 'src' in rule and 'dst' in rule:
@@ -91,7 +94,6 @@ class SimpleSwitch13(app_manager.RyuApp):
         ofproto = datapath.ofproto
         parser = datapath.ofproto_parser
 
-        print "hi"
         self.make_firewall(datapath=datapath, priority=1000)
 
         # install table-miss flow entry
