@@ -14,9 +14,7 @@ class Firewall:
         u"""Cria regra a partir da linha."""
         rule = {
             'n': data[0],
-            'kind': data[2],
-            'src': '*',
-            'dst': '*'
+            'kind': data[2]
         }
         if 'src' in data:
             rule['src'] = data[data.index('src') + 1]
