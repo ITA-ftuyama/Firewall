@@ -95,9 +95,9 @@ class SimpleSwitch13(app_manager.RyuApp):
         ofproto = datapath.ofproto
         parser = datapath.ofproto_parser
 
-        match = parser.OFPMatch(tcp_src='10.0.0.1', tcp_dst='10.0.0.3')
-        actions = [parser.OFPInstructionActions(
-            ofproto.OFPIT_APPLY_ACTIONS, [])]
+        match = parser.OFPMatch(ipv4_src='10.0.0.1', ipv4_dst='10.0.0.3')
+        actions = [parser.OFPActionOutput(ofproto.OFPP_CONTROLLER,
+                                          ofproto.OFPCML_NO_BUFFER)]
         self.add_flow(datapath, 1000, match, actions)
 
         self.make_firewall(datapath=datapath, priority=1000)
