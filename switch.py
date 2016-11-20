@@ -22,6 +22,7 @@ from ryu.controller.handler import set_ev_cls
 from ryu.ofproto import ofproto_v1_3
 from ryu.lib.packet import packet
 from ryu.lib.packet import ethernet
+from ryu.lib.packet import ipv4
 from ryu.lib.packet import ether_types
 from firewall import Firewall
 
@@ -45,8 +46,6 @@ class SimpleSwitch13(app_manager.RyuApp):
         to_table = 1
         table_id = 0
 
-        print 'cenoura'
-
         for rule in self.firewall.rules['permit']:
             match = self.retrieve_matcher(rule, parser)
             inst = [parser.OFPInstructionGotoTable(to_table)]
@@ -62,7 +61,6 @@ class SimpleSwitch13(app_manager.RyuApp):
             msg = parser.OFPFlowMod(datapath=datapath, priority=priority,
                                     match=match, instructions=inst,
                                     table_id=table_id)
-            print 'batata'
             datapath.send_msg(msg)
 
     def retrieve_matcher(self, rule, parser):
@@ -80,7 +78,6 @@ class SimpleSwitch13(app_manager.RyuApp):
             if 'src' in rule and 'dst' in rule:
                 match = parser.OFPMatch(
                     ipv4_src=rule['src'], ipv4_dst=rule['dst'])
-                print "here"
             elif 'src' in rule:
                 match = parser.OFPMatch(ipv4_src=rule['src'])
             elif 'dst' in rule:
@@ -139,6 +136,9 @@ class SimpleSwitch13(app_manager.RyuApp):
 
         pkt = packet.Packet(msg.data)
         eth = pkt.get_protocols(ethernet.ethernet)[0]
+
+        ip = pkt.get_protocols(ipv4.ipv4)[0]
+        print ip.dst
 
         if eth.ethertype == ether_types.ETH_TYPE_LLDP:
             # ignore lldp packet
