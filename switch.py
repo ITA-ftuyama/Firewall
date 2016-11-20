@@ -91,6 +91,7 @@ class SimpleSwitch13(app_manager.RyuApp):
         ofproto = datapath.ofproto
         parser = datapath.ofproto_parser
 
+        print "hi"
         self.make_firewall(datapath=datapath, priority=1000)
 
         # install table-miss flow entry
