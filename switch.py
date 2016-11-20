@@ -45,7 +45,7 @@ class SimpleSwitch13(app_manager.RyuApp):
         to_table = 1
         table_id = 0
 
-        for rule in self.firewall['permit']:
+        for rule in self.firewall.rules['permit']:
             if rule.kind == 'TCP':
                 match = parser.OFPMatch(tcp_src=rule.src, tcp_dst=rule.dst)
             if rule.kind == 'IP':
@@ -56,7 +56,7 @@ class SimpleSwitch13(app_manager.RyuApp):
                                     table_id=table_id)
             datapath.send_msg(msg)
 
-        for rule in self.firewall['deny']:
+        for rule in self.firewall.rules['deny']:
             if rule.kind == 'TCP':
                 match = parser.OFPMatch(tcp_src=rule.src, tcp_dst=rule.dst)
             if rule.kind == 'IP':
