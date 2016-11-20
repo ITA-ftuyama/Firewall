@@ -69,14 +69,14 @@ class SimpleSwitch13(app_manager.RyuApp):
 
     def retrieve_matcher(self, rule, parser):
         u"""Retorna o matcher adequado."""
-        if rule['kind'] == 'TCP':
-            if 'src' in rule and 'dst' in rule:
-                match = parser.OFPMatch(
-                    tcp_src=rule['src'], tcp_dst=rule['dst'], ip_proto=6)
-            elif 'src' in rule:
-                match = parser.OFPMatch(tcp_src=rule['src'], ip_proto=6)
-            elif 'dst' in rule:
-                match = parser.OFPMatch(tcp_dst=rule['dst'], ip_proto=6)
+        # if rule['kind'] == 'TCP':
+        #     if 'src' in rule and 'dst' in rule:
+        #         match = parser.OFPMatch(
+        #             tcp_src=rule['src'], tcp_dst=rule['dst'], ip_proto=6)
+        #     elif 'src' in rule:
+        #         match = parser.OFPMatch(tcp_src=rule['src'], ip_proto=6)
+        #     elif 'dst' in rule:
+        #         match = parser.OFPMatch(tcp_dst=rule['dst'], ip_proto=6)
 
         if rule['kind'] == 'IP':
             if 'src' in rule and 'dst' in rule:
@@ -108,9 +108,9 @@ class SimpleSwitch13(app_manager.RyuApp):
         self.add_flow(datapath, 0, match, actions)
 
         # Adição de regras - Não está funcionando....
-        match = parser.OFPMatch(ipv4_src='10.0.0.1', eth_type=0x800)
-        actions = [parser.OFPActionOutput(80)]
-        self.add_flow(datapath, 1, match, actions, 0)
+        # match = parser.OFPMatch(ipv4_src='10.0.0.1', eth_type=0x800)
+        # actions = [parser.OFPActionOutput(80)]
+        # self.add_flow(datapath, 1, match, actions, 0)
 
         self.make_firewall(datapath=datapath, priority=1000)
 
