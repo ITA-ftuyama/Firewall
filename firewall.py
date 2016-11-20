@@ -20,8 +20,12 @@ class Firewall:
         }
         if 'src' in data:
             rule['src'] = data[data.index('src') + 1]
+            if data[2] == 'TCP':
+                rule['src'] = int(rule['src'])
         if 'dst' in data:
             rule['dst'] = data[data.index('dst') + 1]
+            if data[2] == 'TCP':
+                rule['dst'] = int(rule['dst'])
         return rule
 
     def read_rules(self, file_name):
