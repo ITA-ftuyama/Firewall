@@ -22,17 +22,17 @@ from ryu.controller.handler import set_ev_cls
 from ryu.ofproto import ofproto_v1_3
 from ryu.lib.packet import packet
 from ryu.lib.packet import ethernet
-from ryu.lib.packet import ipv4
 from ryu.lib.packet import ether_types
 from firewall import Firewall
-
-from pprint import pprint
 
 
 class SimpleSwitch13(app_manager.RyuApp):
     u"""Simple Switch with Firewall."""
 
     OFP_VERSIONS = [ofproto_v1_3.OFP_VERSION]
+
+    FIREWALL_TABLE = 0
+    RULES_TABLE = 1
 
     def __init__(self, *args, **kwargs):
         u"""Simple Switch with Firewall."""
@@ -45,40 +45,30 @@ class SimpleSwitch13(app_manager.RyuApp):
         ofproto = datapath.ofproto
         parser = datapath.ofproto_parser
 
-        to_table = 1
-        table_id = 0
-
-        for rule in self.firewall.rules['permit']:
-            if rule['kind'] == 'IP':
-                match = self.retrieve_matcher(rule, parser)
-                inst = [parser.OFPInstructionGotoTable(to_table)]
-                msg = parser.OFPFlowMod(datapath=datapath, priority=priority,
-                                        match=match, instructions=inst,
-                                        table_id=table_id)
-                datapath.send_msg(msg)
-
-        for rule in self.firewall.rules['deny']:
-            if rule['kind'] == 'IP':
+        for rule in self.firewall.rules:
+            # Determina ação do Firewall
+            if rule['type'] == 'permit':
+                inst = [parser.OFPInstructionGotoTable(self.RULES_TABLE)]
+            if rule['type'] == 'deny':
                 inst = [parser.OFPInstructionActions(
                     ofproto.OFPIT_APPLY_ACTIONS, [])]
-                msg = parser.OFPFlowMod(datapath=datapath, priority=priority,
-                                        match=match, instructions=inst,
-                                        table_id=table_id)
-                # print "<msg>"
-                # pprint(msg)
-                # print "<msg/>"
-                datapath.send_msg(msg)
+
+            match = self.retrieve_matcher(rule, parser)
+            msg = parser.OFPFlowMod(datapath=datapath, priority=priority,
+                                    match=match, instructions=inst,
+                                    table_id=self.FIREWALL_TABLE)
+            datapath.send_msg(msg)
 
     def retrieve_matcher(self, rule, parser):
         u"""Retorna o matcher adequado."""
-        # if rule['kind'] == 'TCP':
-        #     if 'src' in rule and 'dst' in rule:
-        #         match = parser.OFPMatch(
-        #             tcp_src=rule['src'], tcp_dst=rule['dst'], ip_proto=6)
-        #     elif 'src' in rule:
-        #         match = parser.OFPMatch(tcp_src=rule['src'], ip_proto=6)
-        #     elif 'dst' in rule:
-        #         match = parser.OFPMatch(tcp_dst=rule['dst'], ip_proto=6)
+        if rule['kind'] == 'TCP':
+            if 'src' in rule and 'dst' in rule:
+                match = parser.OFPMatch(
+                    tcp_src=rule['src'], tcp_dst=rule['dst'], ip_proto=6)
+            elif 'src' in rule:
+                match = parser.OFPMatch(tcp_src=rule['src'], ip_proto=6)
+            elif 'dst' in rule:
+                match = parser.OFPMatch(tcp_dst=rule['dst'], ip_proto=6)
 
         if rule['kind'] == 'IP':
             if 'src' in rule and 'dst' in rule:
@@ -111,12 +101,7 @@ class SimpleSwitch13(app_manager.RyuApp):
                                           ofproto.OFPCML_NO_BUFFER)]
         self.add_flow(datapath, 0, match, actions)
 
-        # Adição de regras - Não está funcionando....
-        # match = parser.OFPMatch(ipv4_src='10.0.0.1', eth_type=0x800)
-        # actions = [parser.OFPActionOutput(80)]
-        # self.add_flow(datapath, 1, match, actions, 0)
-
-    def add_flow(self, datapath, priority, match, actions, table=1, buffer_id=None):
+    def add_flow(self, datapath, priority, match, actions, buffer_id=None):
         u"""Add new flow to controller."""
         ofproto = datapath.ofproto
         parser = datapath.ofproto_parser
@@ -126,10 +111,12 @@ class SimpleSwitch13(app_manager.RyuApp):
         if buffer_id:
             mod = parser.OFPFlowMod(datapath=datapath, buffer_id=buffer_id,
                                     priority=priority, match=match,
-                                    instructions=inst, table_id=table)
+                                    instructions=inst,
+                                    table_id=self.RULES_TABLE)
         else:
             mod = parser.OFPFlowMod(datapath=datapath, priority=priority,
-                                    match=match, instructions=inst, table_id=table)
+                                    match=match, instructions=inst,
+                                    table_id=self.RULES_TABLE)
         datapath.send_msg(mod)
 
     @set_ev_cls(ofp_event.EventOFPPacketIn, MAIN_DISPATCHER)
@@ -147,16 +134,6 @@ class SimpleSwitch13(app_manager.RyuApp):
 
         pkt = packet.Packet(msg.data)
         eth = pkt.get_protocols(ethernet.ethernet)[0]
-        protocolos = pkt.get_protocols(ipv4.ipv4)
-
-        # pprint(vars(pkt))
-        # pprint(dir(pkt))
-        # if len(protocolos) > 0:
-        #     ip = protocolos[0]
-        #     pprint(vars(ip))
-        #     pprint(dir(ip))
-        # else:
-        #     print "NUM TEMM MEU DEUS!!!!"
 
         if eth.ethertype == ether_types.ETH_TYPE_LLDP:
                 # ignore lldp packet

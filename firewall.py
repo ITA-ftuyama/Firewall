@@ -14,6 +14,7 @@ class Firewall:
         u"""Cria regra a partir da linha."""
         rule = {
             'n': data[0],
+            'type': data[1],
             'kind': data[2]
         }
         if 'src' in data:
@@ -28,13 +29,9 @@ class Firewall:
 
     def read_rules(self, file_name):
         u"""Lê o arquivo de regras do Firewall."""
-        self.rules = {
-            'permit': [],
-            'deny': []
-        }
+        self.rules = []
         with open(file_name, 'r') as file:
             for line in file:
-                data = line.split()
-                self.rules[data[1]].append(
-                    self.create_rule(data))
+                self.rules.append(
+                    self.create_rule(line.split()))
         print self.rules
