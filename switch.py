@@ -79,11 +79,11 @@ class SimpleSwitch13(app_manager.RyuApp):
         if rule['kind'] == 'IP':
             if 'src' in rule and 'dst' in rule:
                 match = parser.OFPMatch(
-                    ipv4_src=rule['src'], ipv4_dst=rule['dst'])
+                    ipv6_src=rule['src'], ipv6_dst=rule['dst'])
             elif 'src' in rule:
-                match = parser.OFPMatch(ipv4_src=rule['src'])
+                match = parser.OFPMatch(ipv6_src=rule['src'])
             elif 'dst' in rule:
-                match = parser.OFPMatch(ipv4_dst=rule['dst'])
+                match = parser.OFPMatch(ipv6_dst=rule['dst'])
         return match
 
     @set_ev_cls(ofp_event.EventOFPSwitchFeatures, CONFIG_DISPATCHER)
