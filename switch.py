@@ -54,7 +54,7 @@ class SimpleSwitch13(app_manager.RyuApp):
             datapath.send_msg(msg)
 
         for rule in self.firewall.rules['deny']:
-            match = self.matcher(rule)
+            match = self.matcher(rule, parser)
             inst = [parser.OFPInstructionActions(
                 ofproto.OFPIT_APPLY_ACTIONS, [])]
             msg = parser.OFPFlowMod(datapath=datapath, priority=priority,
