@@ -60,6 +60,7 @@ class SimpleSwitch13(app_manager.RyuApp):
             msg = parser.OFPFlowMod(datapath=datapath, priority=priority,
                                     match=match, instructions=inst,
                                     table_id=table_id)
+            print msg
             datapath.send_msg(msg)
 
     def matcher(self, rule, parser):
@@ -90,12 +91,7 @@ class SimpleSwitch13(app_manager.RyuApp):
         ofproto = datapath.ofproto
         parser = datapath.ofproto_parser
 
-        # ***************************************************
-        # Linhas para verificar o Firewall
-        # Não é assim.... acho que está no lugar errado
-        # ***************************************************
         self.make_firewall(datapath=datapath, priority=1000)
-        # ***************************************************
 
         # install table-miss flow entry
         #
