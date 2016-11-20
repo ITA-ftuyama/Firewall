@@ -2,3 +2,5 @@
 2  deny   IP src 10.0.0.1 dst 10.0.0.3
 3 permit TCP dst 5001
 4 deny  TCP src  56593
+5 permit  TCP src  22
+6 deny  TCP src  23
