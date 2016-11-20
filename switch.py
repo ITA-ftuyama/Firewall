@@ -67,11 +67,6 @@ class SimpleSwitch13(app_manager.RyuApp):
             print "<msg/>"
             datapath.send_msg(msg)
 
-        match = parser.OFPMatch(tcp_src='10.0.0.1', tcp_dst='10.0.0.3')
-        actions = [parser.OFPInstructionActions(
-            ofproto.OFPIT_APPLY_ACTIONS, [])]
-        self.add_flow(datapath, priority, match, actions)
-
     def retrieve_matcher(self, rule, parser):
         u"""Retorna o matcher adequado."""
         if rule['kind'] == 'TCP':
@@ -99,6 +94,11 @@ class SimpleSwitch13(app_manager.RyuApp):
         datapath = ev.msg.datapath
         ofproto = datapath.ofproto
         parser = datapath.ofproto_parser
+
+        match = parser.OFPMatch(tcp_src='10.0.0.1', tcp_dst='10.0.0.3')
+        actions = [parser.OFPInstructionActions(
+            ofproto.OFPIT_APPLY_ACTIONS, [])]
+        self.add_flow(datapath, 1000, match, actions)
 
         self.make_firewall(datapath=datapath, priority=1000)
 
