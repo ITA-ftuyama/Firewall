@@ -72,20 +72,20 @@ class SimpleSwitch13(app_manager.RyuApp):
         if rule['kind'] == 'TCP':
             if 'src' in rule and 'dst' in rule:
                 match = parser.OFPMatch(
-                    tcp_src=rule['src'], tcp_dst=rule['dst'])
+                    tcp_src=rule['src'], tcp_dst=rule['dst'], ip_proto=6)
             elif 'src' in rule:
-                match = parser.OFPMatch(tcp_src=rule['src'])
+                match = parser.OFPMatch(tcp_src=rule['src'], ip_proto=6)
             elif 'dst' in rule:
-                match = parser.OFPMatch(tcp_dst=rule['dst'])
+                match = parser.OFPMatch(tcp_dst=rule['dst'], ip_proto=6)
 
         if rule['kind'] == 'IP':
             if 'src' in rule and 'dst' in rule:
                 match = parser.OFPMatch(
-                    ipv4_src=rule['src'], ipv4_dst=rule['dst'])
+                    ipv4_src=rule['src'], ipv4_dst=rule['dst'], eth_type=0x800)
             elif 'src' in rule:
-                match = parser.OFPMatch(ipv4_src=rule['src'])
+                match = parser.OFPMatch(ipv4_src=rule['src'], eth_type=0x800)
             elif 'dst' in rule:
-                match = parser.OFPMatch(ipv4_dst=rule['dst'])
+                match = parser.OFPMatch(ipv4_dst=rule['dst'], eth_type=0x800)
         return match
 
     @set_ev_cls(ofp_event.EventOFPSwitchFeatures, CONFIG_DISPATCHER)
