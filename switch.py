@@ -57,19 +57,20 @@ class SimpleSwitch13(app_manager.RyuApp):
             datapath.send_msg(msg)
 
         for rule in self.firewall.rules['deny']:
-            match = self.retrieve_matcher(rule, parser)
-            # inst = [parser.OFPInstructionActions(
-            #     ofproto.OFPIT_APPLY_ACTIONS, [])]
-            # msg = parser.OFPFlowMod(datapath=datapath, priority=priority,
-            #                         match=match, instructions=inst,
-            #                         table_id=table_id)
-            actions = [parser.OFPActionOutput(
+            inst = [parser.OFPInstructionActions(
                 ofproto.OFPIT_APPLY_ACTIONS, [])]
-            self.add_flow(datapath, priority, match, actions)
+            msg = parser.OFPFlowMod(datapath=datapath, priority=priority,
+                                    match=match, instructions=inst,
+                                    table_id=table_id)
             print "<msg>"
             pprint(msg)
             print "<msg/>"
-            # datapath.send_msg(msg)
+            datapath.send_msg(msg)
+
+        match = parser.OFPMatch(tcp_src='10.0.0.1', tcp_dst='10.0.0.3')
+        actions = [parser.OFPInstructionActions(
+            ofproto.OFPIT_APPLY_ACTIONS, [])]
+        self.add_flow(datapath, priority, match, actions)
 
     def retrieve_matcher(self, rule, parser):
         u"""Retorna o matcher adequado."""
@@ -148,12 +149,12 @@ class SimpleSwitch13(app_manager.RyuApp):
 
         # pprint(vars(pkt))
         # pprint(dir(pkt))
-        if len(protocolos) > 0:
-            ip = protocolos[0]
-            # pprint(vars(ip))
-            # pprint(dir(ip))
-        else:
-            print "NUM TEMM MEU DEUS!!!!"
+        # if len(protocolos) > 0:
+        #     ip = protocolos[0]
+        #     pprint(vars(ip))
+        #     pprint(dir(ip))
+        # else:
+        #     print "NUM TEMM MEU DEUS!!!!"
 
         if eth.ethertype == ether_types.ETH_TYPE_LLDP:
                 # ignore lldp packet
