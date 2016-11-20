@@ -62,9 +62,9 @@ class SimpleSwitch13(app_manager.RyuApp):
             msg = parser.OFPFlowMod(datapath=datapath, priority=priority,
                                     match=match, instructions=inst,
                                     table_id=table_id)
-            print "<msg>"
-            pprint(msg)
-            print "<msg/>"
+            # print "<msg>"
+            # pprint(msg)
+            # print "<msg/>"
             datapath.send_msg(msg)
 
     def retrieve_matcher(self, rule, parser):
@@ -102,14 +102,15 @@ class SimpleSwitch13(app_manager.RyuApp):
         # 128, OVS will send Packet-In with invalid buffer_id and
         # truncated packet data. In that case, we cannot output packets
         # correctly.  The bug has been fixed in OVS v2.1.0.
-        # match = parser.OFPMatch()
-        # actions = [parser.OFPActionOutput(ofproto.OFPP_CONTROLLER,
-        #                                   ofproto.OFPCML_NO_BUFFER)]
-        # self.add_flow(datapath, 0, match, actions)
+        match = parser.OFPMatch()
+        actions = [parser.OFPActionOutput(ofproto.OFPP_CONTROLLER,
+                                          ofproto.OFPCML_NO_BUFFER)]
+        self.add_flow(datapath, 0, match, actions)
 
-        match = parser.OFPMatch(ipv4_src='10.0.0.1', ipv4_dst='10.0.0.3')
+        # Adição de regras - Não está funcionando....
+        match = parser.OFPMatch(eth_dst=80)
         actions = [parser.OFPActionOutput(80)]
-        self.add_flow(datapath, 1000, match, actions, 0)
+        self.add_flow(datapath, 1, match, actions, 0)
 
         self.make_firewall(datapath=datapath, priority=1000)
 
