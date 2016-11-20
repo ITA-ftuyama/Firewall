@@ -54,21 +54,22 @@ class SimpleSwitch13(app_manager.RyuApp):
             msg = parser.OFPFlowMod(datapath=datapath, priority=priority,
                                     match=match, instructions=inst,
                                     table_id=table_id)
-            self.add_flow(datapath, 0, match, inst)
             datapath.send_msg(msg)
 
         for rule in self.firewall.rules['deny']:
             match = self.retrieve_matcher(rule, parser)
-            inst = [parser.OFPInstructionActions(
+            # inst = [parser.OFPInstructionActions(
+            #     ofproto.OFPIT_APPLY_ACTIONS, [])]
+            # msg = parser.OFPFlowMod(datapath=datapath, priority=priority,
+            #                         match=match, instructions=inst,
+            #                         table_id=table_id)
+            actions = [parser.OFPActionOutput(
                 ofproto.OFPIT_APPLY_ACTIONS, [])]
-            msg = parser.OFPFlowMod(datapath=datapath, priority=priority,
-                                    match=match, instructions=inst,
-                                    table_id=table_id)
-            self.add_flow(datapath, 0, match, inst)
+            self.add_flow(datapath, priority, match, actions)
             print "<msg>"
             pprint(msg)
             print "<msg/>"
-            datapath.send_msg(msg)
+            # datapath.send_msg(msg)
 
     def retrieve_matcher(self, rule, parser):
         u"""Retorna o matcher adequado."""
