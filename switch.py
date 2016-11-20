@@ -62,7 +62,6 @@ class SimpleSwitch13(app_manager.RyuApp):
             msg = parser.OFPFlowMod(datapath=datapath, priority=priority,
                                     match=match, instructions=inst,
                                     table_id=table_id)
-            print msg
             print 'batata'
             datapath.send_msg(msg)
 
@@ -81,6 +80,7 @@ class SimpleSwitch13(app_manager.RyuApp):
             if 'src' in rule and 'dst' in rule:
                 match = parser.OFPMatch(
                     ipv4_src=rule['src'], ipv4_dst=rule['dst'])
+                print "here"
             elif 'src' in rule:
                 match = parser.OFPMatch(ipv4_src=rule['src'])
             elif 'dst' in rule:
