@@ -63,6 +63,7 @@ class SimpleSwitch13(app_manager.RyuApp):
             msg = parser.OFPFlowMod(datapath=datapath, priority=priority,
                                     match=match, instructions=inst,
                                     table_id=table_id)
+            pprint(msg)
             datapath.send_msg(msg)
 
     def retrieve_matcher(self, rule, parser):
@@ -138,10 +139,10 @@ class SimpleSwitch13(app_manager.RyuApp):
 
         pkt = packet.Packet(msg.data)
         eth = pkt.get_protocols(ethernet.ethernet)[0]
-
-        pprint(vars(pkt))
-        pprint(dir(pkt))
         protocolos = pkt.get_protocols(ipv4.ipv4)
+
+        # pprint(vars(pkt))
+        # pprint(dir(pkt))
         if len(protocolos) > 0:
             ip = protocolos[0]
             pprint(vars(ip))
