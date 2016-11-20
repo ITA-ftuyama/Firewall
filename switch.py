@@ -72,11 +72,23 @@ class SimpleSwitch13(app_manager.RyuApp):
 
         for rule in self.firewall.rules['deny']:
             if rule['kind'] == 'TCP':
-                match = parser.OFPMatch(
-                    tcp_src=rule['src'], tcp_dst=rule['dst'])
+                if 'src' in rule and 'dst' in rule:
+                    match = parser.OFPMatch(
+                        tcp_src=rule['src'], tcp_dst=rule['dst'])
+                elif 'src' in rule:
+                    match = parser.OFPMatch(tcp_src=rule['src'])
+                elif 'dst' in rule:
+                    match = parser.OFPMatch(tcp_dst=rule['dst'])
+
             if rule['kind'] == 'IP':
-                match = parser.OFPMatch(
-                    ipv4_src=rule['src'], ipv4_dst=rule['dst'])
+                if 'src' in rule and 'dst' in rule:
+                    match = parser.OFPMatch(
+                        ipv4_src=rule['src'], ipv4_dst=rule['dst'])
+                elif 'src' in rule:
+                    match = parser.OFPMatch(ipv4_src=rule['src'])
+                elif 'dst' in rule:
+                    match = parser.OFPMatch(ipv4_dst=rule['dst'])
+
             inst = [parser.OFPInstructionActions(
                 ofproto.OFPIT_APPLY_ACTIONS, [])]
             msg = parser.OFPFlowMod(datapath=datapath, priority=priority,
