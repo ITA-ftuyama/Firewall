@@ -17,14 +17,11 @@ class Firewall:
             'type': data[1],
             'kind': data[2]
         }
-        if 'src' in data:
-            rule['src'] = data[data.index('src') + 1]
-            if data[2] == 'TCP':
-                rule['src'] = int(rule['src'])
-        if 'dst' in data:
-            rule['dst'] = data[data.index('dst') + 1]
-            if data[2] == 'TCP':
-                rule['dst'] = int(rule['dst'])
+        for key in ['src', 'dst']:
+            if key in data:
+                rule[key] = data[data.index(key) + 1]
+                if data[2] == 'TCP':
+                    rule[key] = int(rule[key])
         return rule
 
     def read_rules(self, file_name):
@@ -35,3 +32,5 @@ class Firewall:
                 self.rules.append(
                     self.create_rule(line.split()))
         print self.rules
+
+Firewall()
