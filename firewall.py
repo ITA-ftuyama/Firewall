@@ -32,5 +32,3 @@ class Firewall:
                 self.rules.append(
                     self.create_rule(line.split()))
         print self.rules
-
-Firewall()
