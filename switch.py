@@ -40,11 +40,21 @@ class SimpleSwitch13(app_manager.RyuApp):
         self.mac_to_port = {}
         self.firewall = Firewall()
 
-    def make_firewall(self, datapath, priority):
+    def make_firewall(self, datapath):
         u"""Instala o módulo de firewall."""
         ofproto = datapath.ofproto
         parser = datapath.ofproto_parser
 
+        # Regra default - encaminhar tabela 1
+        match = parser.OFPMatch()
+        inst = [parser.OFPInstructionGotoTable(self.RULES_TABLE)]
+        msg = parser.OFPFlowMod(datapath=datapath, priority=0,
+                                match=match, instructions=inst,
+                                table_id=self.FIREWALL_TABLE)
+        datapath.send_msg(msg)
+
+        # Adicionar regras do Firewall
+        priority = 1
         for rule in self.firewall.rules:
             # Determina ação do Firewall
             if rule['type'] == 'permit':
@@ -58,6 +68,7 @@ class SimpleSwitch13(app_manager.RyuApp):
                                     match=match, instructions=inst,
                                     table_id=self.FIREWALL_TABLE)
             datapath.send_msg(msg)
+            priority += 1
 
     def retrieve_matcher(self, rule, parser):
         u"""Retorna o matcher adequado."""
@@ -90,7 +101,7 @@ class SimpleSwitch13(app_manager.RyuApp):
         ofproto = datapath.ofproto
         parser = datapath.ofproto_parser
 
-        self.make_firewall(datapath=datapath, priority=1)
+        self.make_firewall(datapath=datapath)
 
         # install table-miss flow entry
         #
